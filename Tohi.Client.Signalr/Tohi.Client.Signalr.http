@@ -1,0 +1,6 @@
+@Tohi.Client.Signalr_HostAddress = http://localhost:5227
+
+GET {{Tohi.Client.Signalr_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

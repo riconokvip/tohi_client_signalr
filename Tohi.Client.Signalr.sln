@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34511.84
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tohi.Client.Signalr", "Tohi.Client.Signalr\Tohi.Client.Signalr.csproj", "{EDEE799A-5B18-43DC-B71D-9CC8EBEB18A2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EDEE799A-5B18-43DC-B71D-9CC8EBEB18A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EDEE799A-5B18-43DC-B71D-9CC8EBEB18A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EDEE799A-5B18-43DC-B71D-9CC8EBEB18A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EDEE799A-5B18-43DC-B71D-9CC8EBEB18A2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D52D7E33-5D7D-407F-A691-AD874201770C}
+	EndGlobalSection
+EndGlobal
