@@ -82,5 +82,5 @@ static void ConfigMapping(WebApplicationBuilder builder)
 static void ConfigServices(WebApplicationBuilder builder)
 {
     builder.Services.AddTransient<ApplicationMiddleware>();
-    builder.Services.AddScoped<IDistributedCacheExtensionCache, DistributedCacheExtensionService>();
+    builder.Services.AddScoped<IDistributedCacheExtensionService, DistributedCacheExtensionService>();
 }

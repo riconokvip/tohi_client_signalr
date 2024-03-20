@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace Tohi.Client.Signalr.Services.Cachings
 {
-    public interface IDistributedCacheExtensionCache
+    public interface IDistributedCacheExtensionService
     {
         /// <summary>
         /// Lưu trữ dữ liệu vào cache
@@ -42,7 +42,7 @@ namespace Tohi.Client.Signalr.Services.Cachings
         /// <returns></returns>
         Task RemoveAsync(string key);
     }
-    public class DistributedCacheExtensionService : IDistributedCacheExtensionCache
+    public class DistributedCacheExtensionService : IDistributedCacheExtensionService
     {
         private readonly IDistributedCache _cache;
         public DistributedCacheExtensionService(IDistributedCache cache)
