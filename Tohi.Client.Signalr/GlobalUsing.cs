@@ -33,3 +33,7 @@ global using Tohi.Client.Signalr.Services.Streams;
 
 // Repositories
 global using Tohi.Client.Signalr.Repositories;
+
+
+// SQL Dependencies
+global using Tohi.Client.Signalr.SQLDependencies;

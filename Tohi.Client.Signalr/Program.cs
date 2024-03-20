@@ -1,4 +1,6 @@
+using MessagePack;
 using Microsoft.EntityFrameworkCore;
+using Tohi.Client.Signalr.Hubs;
 using Tohi.Client.Signalr.MiddlewareExtensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,6 +30,8 @@ ConfigMapping(builder);
 
 ConfigServices(builder);
 
+ConfigSignalR(builder);
+
 var app = builder.Build();
 
 // Setup cors
@@ -35,6 +39,10 @@ app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
 // Setup middleware
 app.UseMiddleware<ApplicationMiddleware>();
+
+var connectionString = app.Configuration.GetConnectionString("DefaultConnection");
+app.UseTableDependency<UserDependency>(connectionString);
+app.UseTableDependency<CdnLiveDependency>(connectionString);
 
 // Migration database
 using (var scope = app.Services.CreateScope())
@@ -88,4 +96,20 @@ static void ConfigServices(WebApplicationBuilder builder)
     builder.Services.AddScoped<ICdnLiveService, CdnLiveService>();
 
     builder.Services.AddScoped<IClientService, ClientService>();
+}
+
+// Setup signalr service
+static void ConfigSignalR(WebApplicationBuilder builder)
+{
+    builder.Services.AddSignalR()
+    .AddMessagePackProtocol(options =>
+    {
+        options.SerializerOptions = MessagePackSerializerOptions.Standard
+            .WithSecurity(MessagePackSecurity.TrustedData);
+    });
+
+    builder.Services.AddSingleton<ClientHub>();
+
+    builder.Services.AddSingleton<UserDependency>();
+    builder.Services.AddSingleton<CdnLiveDependency>();
 }
