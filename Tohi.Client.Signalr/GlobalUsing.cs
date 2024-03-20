@@ -26,3 +26,7 @@ global using Tohi.Client.Signalr.Data;
 
 // Services
 global using Tohi.Client.Signalr.Services.Cachings;
+
+
+// Repositories
+global using Tohi.Client.Signalr.Repositories;
