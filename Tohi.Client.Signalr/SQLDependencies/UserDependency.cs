@@ -1,5 +1,6 @@
 ﻿using TableDependency.SqlClient;
 using TableDependency.SqlClient.Base.EventArgs;
+using SQLActionEnums = TableDependency.SqlClient.Base.Enums.ChangeType;
 
 namespace Tohi.Client.Signalr.SQLDependencies
 {
@@ -33,7 +34,7 @@ namespace Tohi.Client.Signalr.SQLDependencies
         {
             try
             {
-                if (e.ChangeType == TableDependency.SqlClient.Base.Enums.ChangeType.Update)
+                if (e.ChangeType == SQLActionEnums.Update)
                 {
                     if (e.Entity == null)
                         throw new BaseException(ErrorEnums.UserNotFoundWhileChange);
