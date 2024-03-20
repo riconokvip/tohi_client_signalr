@@ -86,4 +86,6 @@ static void ConfigServices(WebApplicationBuilder builder)
     builder.Services.AddScoped<IUserService, UserService>();
     builder.Services.AddScoped<IStreamService, StreamService>();
     builder.Services.AddScoped<ICdnLiveService, CdnLiveService>();
+
+    builder.Services.AddScoped<IClientService, ClientService>();
 }

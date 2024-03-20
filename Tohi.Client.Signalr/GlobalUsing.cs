@@ -25,6 +25,7 @@ global using Tohi.Client.Signalr.Data;
 
 
 // Services
+global using Tohi.Client.Signalr.Services;
 global using Tohi.Client.Signalr.Services.Cachings;
 global using Tohi.Client.Signalr.Services.Users;
 global using Tohi.Client.Signalr.Services.Streams;
