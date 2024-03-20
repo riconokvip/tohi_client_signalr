@@ -22,3 +22,7 @@ global using AutoMapper;
 
 // DbContext
 global using Tohi.Client.Signalr.Data;
+
+
+// Services
+global using Tohi.Client.Signalr.Services.Cachings;

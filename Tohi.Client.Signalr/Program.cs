@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Tohi.Client.Signalr.MiddlewareExtensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,12 +26,15 @@ ConfigAuthentication(builder);
 
 ConfigMapping(builder);
 
-
+ConfigServices(builder);
 
 var app = builder.Build();
 
 // Setup cors
 app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+
+// Setup middleware
+app.UseMiddleware<ApplicationMiddleware>();
 
 // Migration database
 using (var scope = app.Services.CreateScope())
@@ -72,4 +76,11 @@ static void ConfigAuthentication(WebApplicationBuilder builder)
 static void ConfigMapping(WebApplicationBuilder builder)
 {
     builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+}
+
+// Setup register service
+static void ConfigServices(WebApplicationBuilder builder)
+{
+    builder.Services.AddTransient<ApplicationMiddleware>();
+    builder.Services.AddScoped<IDistributedCacheExtensionCache, DistributedCacheExtensionService>();
 }
