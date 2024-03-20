@@ -18,3 +18,7 @@ global using Tohi.Client.Signalr.Models.ViewModels;
 
 // Mapping
 global using AutoMapper;
+
+
+// DbContext
+global using Tohi.Client.Signalr.Data;
