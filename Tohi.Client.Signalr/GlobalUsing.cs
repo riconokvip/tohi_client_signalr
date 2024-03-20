@@ -12,3 +12,4 @@ global using Tohi.Client.Signalr.JwtAuthentications;
 // Models
 global using Tohi.Client.Signalr.Models.DbModels;
 global using Tohi.Client.Signalr.Models.DbModels.Bases;
+global using Tohi.Client.Signalr.Models.CacheModels;
