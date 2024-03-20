@@ -49,5 +49,28 @@ namespace Tohi.Client.Signalr.Hubs
                 throw new Exception($"[OnConnectedAsync]: unhandled exception, {ex.Message}");
             }
         }
+
+        /// <summary>
+        /// Ngắt kết nối với socket
+        /// </summary>
+        /// <returns></returns>
+        public override async Task OnDisconnectedAsync(Exception exception)
+        {
+            try
+            {
+                await base.OnDisconnectedAsync(exception);
+                connections--;
+                var connectionId = Context.ConnectionId;
+                var userId = Context.User.Identity.Name;
+            }
+            catch (BaseException ex)
+            {
+                _logger.LogError($"[OnConnectedAsync]: handled exception, {ex.message}");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"[OnConnectedAsync]: unhandled exception, {ex.Message}");
+            }
+        }
     }
 }
