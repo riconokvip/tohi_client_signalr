@@ -83,4 +83,5 @@ static void ConfigServices(WebApplicationBuilder builder)
 {
     builder.Services.AddTransient<ApplicationMiddleware>();
     builder.Services.AddScoped<IDistributedCacheExtensionService, DistributedCacheExtensionService>();
+    builder.Services.AddScoped<IUserService, UserService>();
 }
