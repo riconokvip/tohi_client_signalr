@@ -12,12 +12,18 @@ namespace Tohi.Client.Signalr.Services.Streams
         Task<StreamEntities> GetStream(string group);
 
         /// <summary>
-        /// Cập nhật lượt xem livestream vào database và cache
+        /// Giảm lượt xem livestream vào database và cache
         /// </summary>
         /// <param name="entity">Đối tượng stream</param>
-        /// <param name="viewer">Số lượt xem thay đổi</param>
         /// <returns></returns>
-        Task UpdateViewerStream(StreamEntities entity, int viewer = 0);
+        Task DownViewerStream(StreamEntities entity);
+
+        /// <summary>
+        /// Tăng lượt xem livestream vào database và cache
+        /// </summary>
+        /// <param name="entity">Đối tượng stream</param>
+        /// <returns></returns>
+        Task IncreaseViewerStream(StreamEntities entity);
     }
 
     public class StreamService : IStreamService
@@ -57,25 +63,59 @@ namespace Tohi.Client.Signalr.Services.Streams
                 throw new BaseException(ErrorEnums.LivestreamNotFound);
         }
 
-        public async Task UpdateViewerStream(StreamEntities entity, int viewer = 0)
+        public async Task DownViewerStream(StreamEntities entity)
         {
             if (entity != null)
             {
-                if (entity.CurrentViewers + viewer < 0)
+                if (entity.CurrentViewers < 1)
                     throw new BaseException(ErrorEnums.LivestreamFailCountViewer);
 
-                // Cập nhật lượt xem vào database
+                // Giảm lượt xem vào database nếu livestream đang online
                 if (entity.Status == (int)LivestreamEnums.Online)
                 {
-                    if (entity.MaxViewers < entity.CurrentViewers + viewer)
-                        entity.MaxViewers = entity.CurrentViewers + viewer;
-                    entity.CurrentViewers = entity.CurrentViewers + viewer;
+                    entity.CurrentViewers = entity.CurrentViewers - 1;
                     await _repo.Update(entity);
                 }
 
-                // Cập nhật lượt xem hiện tai vào cache
+                // Giảm lượt xem hiện tại vào cache, nếu lượt xem bằng 0 thì xóa cache
                 var streamViewerKey = LivestreamKeys.Viewer(entity.UserId);
-                await _cache.SetAsync(streamViewerKey, entity.CurrentViewers + viewer);
+                var streamViewer = _cache.TryGetValue<int>(streamViewerKey, out var _streamViewer);
+                if (streamViewer)
+                {
+                    if (_streamViewer > 1)
+                        await _cache.SetAsync(streamViewerKey, _streamViewer - 1);
+                    else if (_streamViewer == 1)
+                        await _cache.RemoveAsync(streamViewerKey);
+                    else
+                        throw new BaseException(ErrorEnums.UserFailCountJoin);
+                }
+                else
+                    throw new BaseException(ErrorEnums.UserNotFoundCountJoin);
+            }
+            else
+                throw new BaseException(ErrorEnums.LivestreamNotFound);
+        }
+
+        public async Task IncreaseViewerStream(StreamEntities entity)
+        {
+            if (entity != null)
+            {
+                // Tăng lượt xem vào database nếu livestream đang online
+                if (entity.Status == (int)LivestreamEnums.Online)
+                {
+                    if (entity.MaxViewers < entity.CurrentViewers + 1)
+                        entity.MaxViewers = entity.CurrentViewers + 1;
+                    entity.CurrentViewers = entity.CurrentViewers + 1;
+                    await _repo.Update(entity);
+                }
+
+                // Tăng lượt xem hiện tại vào cache
+                var streamViewerKey = LivestreamKeys.Viewer(entity.UserId);
+                var streamViewer = _cache.TryGetValue<int>(streamViewerKey, out var _streamViewer);
+                if (streamViewer)
+                    await _cache.SetAsync(streamViewerKey, _streamViewer + 1);
+                else
+                    await _cache.SetAsync(streamViewerKey, 1);
             }
             else
                 throw new BaseException(ErrorEnums.LivestreamNotFound);

@@ -21,7 +21,7 @@
         /// </summary>
         /// <param name="userId">Id người dùng</param>
         /// <returns></returns>
-        public static string CountJoinGroup(string userId) => $"{userId}_join";
+        public static string CountJoinGroup(string userId, string group) => $"{userId}_{group}_join";
 
         /// <summary>
         /// Khóa lưu trữ đường dẫn livestream của người dùng

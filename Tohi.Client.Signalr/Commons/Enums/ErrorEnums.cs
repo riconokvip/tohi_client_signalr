@@ -14,7 +14,7 @@ namespace Tohi.Client.Signalr.Commons.Enums
         UserNotFoundWhileChange = -102,
         [Display(Name = "Không thể lấy dữ liệu số lần tham gia phòng livestream của người dùng")]
         UserNotFoundCountJoin = -103,
-        [Display(Name = "Số lần tham gia phòng livestream của người dùng nhỏ hơn 0")]
+        [Display(Name = "Số lần tham gia phòng livestream của người dùng nhỏ hơn 1")]
         UserFailCountJoin = -104,
         [Display(Name = "Không thể trò chuyện hoặc tặng quà do bạn có hành vi tiêu cực")]
         UserIsBannedInLivestream = -105,

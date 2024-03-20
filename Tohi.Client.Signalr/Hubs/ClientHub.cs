@@ -88,30 +88,33 @@ namespace Tohi.Client.Signalr.Hubs
                 // Xử lý tham gia phòng livestream
                 using (var scope = _scope.CreateScope())
                 {
-                    if (userId != null)
+                    var client = scope.ServiceProvider.GetRequiredService<IClientService>();
+                    var cache = scope.ServiceProvider.GetRequiredService<IDistributedCacheExtensionService>();
+
+                    // Lấy dữ liệu người dùng và stream
+                    var user = await client.GetClientUser(userId);
+                    var stream = await client.GetClientStream(group);
+
+                    // Cập nhật phòng tham gia cho client
+                    var clientLivestreamKey = ClientKeys.Livestream(connectionId);
+                    var clientLivestream = cache.TryGetValue<string>(clientLivestreamKey, out var _clientLivestream);
+                    if (clientLivestream)
                     {
-                        var client = scope.ServiceProvider.GetRequiredService<IClientService>();
-                        var cache = scope.ServiceProvider.GetRequiredService<IDistributedCacheExtensionService>();
-
-                        // Lấy dữ liệu người dùng và stream
-                        var user = await client.GetClientUser(userId);
-                        var stream = await client.GetClientStream(group);
-
-                        // Cập nhật phòng tham gia cho client
-                        var clientLivestreamKey = ClientKeys.Livestream(connectionId);
-                        var clientLivestream = cache.TryGetValue<string>(clientLivestreamKey, out var _clientLivestream);
-                        if (clientLivestream)
+                        if (_clientLivestream != group)
                         {
-                            if (_clientLivestream != group)
-                            {
-                                // Xóa client khỏi phòng và cập nhật lượt xem của phòng cũ
-                                await Groups.RemoveFromGroupAsync(connectionId, _clientLivestream);
-                                await client.UpdateViewerForStreamByGroup(_clientLivestream, -1);
-                            }
+                            // Xóa client khỏi phòng
+                            await Groups.RemoveFromGroupAsync(connectionId, _clientLivestream);
+                            // Cập nhật lượt xem của phòng cũ
+                            await client.DownViewerForStreamByGroup(_clientLivestream, userId);
                         }
-                        await cache.SetAsync(clientLivestreamKey, group);
-                        await Groups.AddToGroupAsync(connectionId, group);
                     }
+                    await cache.SetAsync(clientLivestreamKey, group);
+                    await Groups.AddToGroupAsync(connectionId, group);
+
+                    // Thông báo người dùng mới tham gia phòng và tăng lượt xem của phòng mới
+                    var isNotify = await client.IncreaseViewerForStreamByGroup(stream, group, userId);
+                    if (isNotify && connections > 0)
+                        await Clients.Group(group).SendAsync(EventEnums.RecvRoomNotify.ToString(), _mapper.Map<UserResponseModels>(user));
                 }
             }
             catch (BaseException ex)

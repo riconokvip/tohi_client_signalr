@@ -19,21 +19,39 @@
 
 
         /// <summary>
-        /// Cập nhật số lượt xem cho phòng livestream
+        /// Giảm số lượt xem cho phòng livestream
         /// </summary>
         /// <param name="group"></param>
         /// <param name="viewer"></param>
         /// <returns></returns>
-        Task UpdateViewerForStreamByGroup(string group, int viewer = 0);
+        Task DownViewerForStreamByGroup(string group, string userId);
 
 
         /// <summary>
-        /// Cập nhật số lượt xem cho phòng livestream
+        /// Tăng số lượt xem cho phòng livestream
         /// </summary>
         /// <param name="group"></param>
         /// <param name="viewer"></param>
         /// <returns></returns>
-        Task UpdateViewerForStream(StreamEntities stream, int viewer = 0);
+        Task IncreaseViewerForStreamByGroup(string group, string userId);
+
+
+        /// <summary>
+        /// Giảm số lượt xem cho phòng livestream
+        /// </summary>
+        /// <param name="group"></param>
+        /// <param name="viewer"></param>
+        /// <returns></returns>
+        Task DownViewerForStreamByGroup(StreamEntities stream, string group, string userId);
+
+
+        /// <summary>
+        /// Tăng số lượt xem cho phòng livestream
+        /// </summary>
+        /// <param name="group"></param>
+        /// <param name="viewer"></param>
+        /// <returns></returns>
+        Task<bool> IncreaseViewerForStreamByGroup(StreamEntities stream, string group, string userId);
     }
 
     public class ClientService : IClientService
@@ -70,15 +88,116 @@
                 return await _streamService.GetStream(group);
         }
 
-        public async Task UpdateViewerForStreamByGroup(string group, int viewer = 0)
+        public async Task DownViewerForStreamByGroup(string group, string userId)
         {
-            var stream = await _streamService.GetStream(group);
-            await _streamService.UpdateViewerStream(stream, viewer);
+            // Nếu là người dùng
+            if (userId != null)
+            {
+                var userJoinKey = UserKeys.CountJoinGroup(userId, group);
+                var userJoin = _cache.TryGetValue<int>(userJoinKey, out var _userJoin);
+                if (userJoin)
+                {
+                    if (_userJoin == 1)
+                    {
+                        var stream = await _streamService.GetStream(group);
+                        await _streamService.DownViewerStream(stream);
+                        await _cache.RemoveAsync(userJoinKey);
+                    }
+                    else if (_userJoin > 1)
+                        await _cache.SetAsync(userJoinKey, _userJoin - 1);
+                    else
+                        throw new BaseException(ErrorEnums.UserFailCountJoin);
+                }
+                else
+                    throw new BaseException(ErrorEnums.UserNotFoundCountJoin);
+            }
+            // Nếu là người dùng ẩn danh
+            else
+            {
+                var stream = await _streamService.GetStream(group);
+                await _streamService.DownViewerStream(stream);
+            }
         }
 
-        public async Task UpdateViewerForStream(StreamEntities stream, int viewer = 0)
+        public async Task IncreaseViewerForStreamByGroup(string group, string userId)
         {
-            await _streamService.UpdateViewerStream(stream, viewer);
+            // Nếu là người dùng
+            if (userId != null)
+            {
+                var userJoinKey = UserKeys.CountJoinGroup(userId, group);
+                var userJoin = _cache.TryGetValue<int>(userJoinKey, out var _userJoin);
+                if (userJoin)
+                {
+                    await _cache.SetAsync(userJoinKey, _userJoin + 1);
+                }    
+                else
+                {
+                    var stream = await _streamService.GetStream(group);
+                    await _streamService.IncreaseViewerStream(stream);
+                    await _cache.SetAsync(userJoinKey, 1);
+                }   
+            }
+            // Nếu là người dùng ẩn danh
+            else
+            {
+                var stream = await _streamService.GetStream(group);
+                await _streamService.IncreaseViewerStream(stream);
+            }
+        }
+
+        public async Task DownViewerForStreamByGroup(StreamEntities stream, string group, string userId)
+        {
+            // Nếu là người dùng
+            if (userId != null)
+            {
+                var userJoinKey = UserKeys.CountJoinGroup(userId, group);
+                var userJoin = _cache.TryGetValue<int>(userJoinKey, out var _userJoin);
+                if (userJoin)
+                {
+                    if (_userJoin == 1)
+                    {
+                        await _streamService.DownViewerStream(stream);
+                        await _cache.RemoveAsync(userJoinKey);
+                    }
+                    else if (_userJoin > 1)
+                        await _cache.SetAsync(userJoinKey, _userJoin - 1);
+                    else
+                        throw new BaseException(ErrorEnums.UserFailCountJoin);
+                }
+                else
+                    throw new BaseException(ErrorEnums.UserNotFoundCountJoin);
+            }
+            // Nếu là người dùng ẩn danh
+            else
+            {
+                await _streamService.DownViewerStream(stream);
+            }
+        }
+
+        public async Task<bool> IncreaseViewerForStreamByGroup(StreamEntities stream, string group, string userId)
+        {
+            // Nếu là người dùng
+            if (userId != null)
+            {
+                var userJoinKey = UserKeys.CountJoinGroup(userId, group);
+                var userJoin = _cache.TryGetValue<int>(userJoinKey, out var _userJoin);
+                if (userJoin)
+                {
+                    await _cache.SetAsync(userJoinKey, _userJoin + 1);
+                }
+                else
+                {
+                    await _streamService.IncreaseViewerStream(stream);
+                    await _cache.SetAsync(userJoinKey, 1);
+                    return true;
+                }
+            }
+            // Nếu là người dùng ẩn danh
+            else
+            {
+                await _streamService.IncreaseViewerStream(stream);
+            }
+            return false;
         }
     }
 }
