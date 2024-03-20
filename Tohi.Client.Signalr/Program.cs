@@ -6,6 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddCors();
 
 // Add cache
 builder.Services.AddOptions();
@@ -20,6 +21,9 @@ builder.Services.AddDbContextPool<ApplicationDbContext>(options =>
 });
 
 var app = builder.Build();
+
+// Setup cors
+app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
 // Migration database
 using (var scope = app.Services.CreateScope())
