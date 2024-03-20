@@ -43,6 +43,7 @@ app.UseMiddleware<ApplicationMiddleware>();
 var connectionString = app.Configuration.GetConnectionString("DefaultConnection");
 app.UseTableDependency<UserDependency>(connectionString);
 app.UseTableDependency<CdnLiveDependency>(connectionString);
+app.UseTableDependency<StreamDependency>(connectionString);
 
 // Migration database
 using (var scope = app.Services.CreateScope())
@@ -114,4 +115,5 @@ static void ConfigSignalR(WebApplicationBuilder builder)
 
     builder.Services.AddSingleton<UserDependency>();
     builder.Services.AddSingleton<CdnLiveDependency>();
+    builder.Services.AddSingleton<StreamDependency>();
 }

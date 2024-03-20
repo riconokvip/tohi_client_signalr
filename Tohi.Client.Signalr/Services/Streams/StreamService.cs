@@ -24,6 +24,13 @@ namespace Tohi.Client.Signalr.Services.Streams
         /// <param name="entity">Đối tượng stream</param>
         /// <returns></returns>
         Task IncreaseViewerStream(StreamEntities entity);
+
+        /// <summary>
+        /// Update lượt xem livestream từ cache vào database
+        /// </summary>
+        /// <param name="entity">Đối tượng stream</param>
+        /// <returns></returns>
+        Task UpdateViewerStream(StreamEntities entity);
     }
 
     public class StreamService : IStreamService
@@ -116,6 +123,24 @@ namespace Tohi.Client.Signalr.Services.Streams
                     await _cache.SetAsync(streamViewerKey, _streamViewer + 1);
                 else
                     await _cache.SetAsync(streamViewerKey, 1);
+            }
+            else
+                throw new BaseException(ErrorEnums.LivestreamNotFound);
+        }
+
+        public async Task UpdateViewerStream(StreamEntities entity)
+        {
+            if (entity != null)
+            {
+                var streamViewerKey = LivestreamKeys.Viewer(entity.UserId);
+                var streamViewer = _cache.TryGetValue<int>(streamViewerKey, out var _streamViewer);
+                if (streamViewer)
+                {
+                    if (entity.MaxViewers < _streamViewer)
+                        entity.MaxViewers = _streamViewer;
+                    entity.CurrentViewers = _streamViewer;
+                    await _repo.Update(entity);
+                }
             }
             else
                 throw new BaseException(ErrorEnums.LivestreamNotFound);

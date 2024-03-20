@@ -91,8 +91,7 @@ namespace Tohi.Client.Signalr.Hubs
                     var client = scope.ServiceProvider.GetRequiredService<IClientService>();
                     var cache = scope.ServiceProvider.GetRequiredService<IDistributedCacheExtensionService>();
 
-                    // Lấy dữ liệu người dùng và stream
-                    var user = await client.GetClientUser(userId);
+                    // Lấy dữ liệu stream
                     var stream = await client.GetClientStream(group);
 
                     // Cập nhật phòng tham gia cho client
@@ -100,6 +99,11 @@ namespace Tohi.Client.Signalr.Hubs
                     var clientLivestream = cache.TryGetValue<string>(clientLivestreamKey, out var _clientLivestream);
                     if (clientLivestream)
                     {
+                        if (_clientLivestream == group)
+                        {
+                            await Clients.Caller.SendAsync(EventEnums.RecvExceptionNotify.ToString(), "Người dùng đã ở trong phòng");
+                            return;
+                        }
                         if (_clientLivestream != group)
                         {
                             // Xóa client khỏi phòng
@@ -114,7 +118,10 @@ namespace Tohi.Client.Signalr.Hubs
                     // Thông báo người dùng mới tham gia phòng và tăng lượt xem của phòng mới
                     var isNotify = await client.IncreaseViewerForStreamByGroup(stream, group, userId);
                     if (isNotify && connections > 0)
+                    {
+                        var user = await client.GetClientUser(userId);
                         await Clients.Group(group).SendAsync(EventEnums.RecvRoomNotify.ToString(), _mapper.Map<UserResponseModels>(user));
+                    }
                 }
             }
             catch (BaseException ex)
@@ -124,6 +131,39 @@ namespace Tohi.Client.Signalr.Hubs
             catch (Exception ex)
             {
                 throw new Exception($"[JoinGroup]: unhandled exception, {ex.Message}");
+            }
+        }
+
+
+
+
+        /// <summary>
+        /// Thông báo livestream thay đổi
+        /// </summary>
+        /// <param name="stream">Phòng livestream</param>
+        /// <returns></returns>
+        public async Task SendStreamChangeNotify(StreamEntities stream)
+        {
+            using (var scope = _scope.CreateScope())
+            {
+                var cache = scope.ServiceProvider.GetRequiredService<IDistributedCacheExtensionService>();
+                var cdn = scope.ServiceProvider.GetRequiredService<ICdnLiveService>();
+
+                var streamSender = _mapper.Map<StreamResponseModels>(stream);
+                streamSender.Viewer = stream.MaxViewers;
+                if (stream.Status == (int)LivestreamEnums.Online)
+                    streamSender.Viewer = stream.CurrentViewers;
+
+                var userHlsSrcKey = UserKeys.HlsSrc(stream.UserId);
+                var userHlsSrc = cache.TryGetValue<string>(userHlsSrcKey, out var hlsSrc);
+                if (userHlsSrc)
+                    streamSender.HlsSrc = hlsSrc;
+                else
+                    streamSender.HlsSrc = await cdn.GetCdnlive(stream.UserId);
+
+                await Clients.Group(stream.UserId).SendAsync(EventEnums.RecvStreamChangeNotify.ToString(), streamSender);
+                var streamInformationKey = LivestreamKeys.Information(stream.UserId);
+                await cache.SetAsync(streamInformationKey, stream, MemoryCaches.ExpiredTimeEntry);
             }
         }
     }

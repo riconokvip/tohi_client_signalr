@@ -30,9 +30,6 @@ namespace Tohi.Client.Signalr.Services.Streams
                 var cdnLive = await _repo.UseQueries().FirstOrDefaultAsync(_ => _.UserId == group);
                 if (cdnLive != null)
                 {
-                    if (cdnLive.IsDeleted)
-                        throw new BaseException(ErrorEnums.CdnliveNotFound);
-
                     // Cập nhật hls vào cache
                     var userHlsSrcKey = UserKeys.HlsSrc(group);
                     await _cache.SetAsync(userHlsSrcKey, cdnLive.HlsPlayLink, MemoryCaches.ExpiredTimeEntry);
