@@ -7,6 +7,8 @@
             CreateMap<StreamEntities, StreamResponseModels>()
                 .ForMember(dest => dest.TypeStream, act => act.MapFrom(src => src.Status))
                 .ReverseMap();
+
+            CreateMap<StreamEntities, StreamModels>().ReverseMap();
         }
     }
 }
