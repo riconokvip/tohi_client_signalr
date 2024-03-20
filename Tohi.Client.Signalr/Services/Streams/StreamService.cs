@@ -9,7 +9,7 @@ namespace Tohi.Client.Signalr.Services.Streams
         /// </summary>
         /// <param name="group">Phòng livestream</param>
         /// <returns></returns>
-        Task<StreamModels> GetStream(string group);
+        Task<StreamEntities> GetStream(string group);
 
         /// <summary>
         /// Cập nhật lượt xem livestream vào database và cache
@@ -33,7 +33,7 @@ namespace Tohi.Client.Signalr.Services.Streams
             _mapper = mapper;
         }
 
-        public async Task<StreamModels> GetStream(string group)
+        public async Task<StreamEntities> GetStream(string group)
         {
             if (group != null)
             {
@@ -47,9 +47,8 @@ namespace Tohi.Client.Signalr.Services.Streams
 
                     // Lưu thông tin livestream vào cache
                     var streamInfomation = LivestreamKeys.Information(group);
-                    var streamCacheModel = _mapper.Map<StreamModels>(stream);
-                    await _cache.SetAsync(streamInfomation, streamCacheModel, MemoryCaches.ExpiredTimeEntry);
-                    return streamCacheModel;
+                    await _cache.SetAsync(streamInfomation, stream, MemoryCaches.ExpiredTimeEntry);
+                    return stream;
                 }
                 else
                     throw new BaseException(ErrorEnums.LivestreamNotFound);

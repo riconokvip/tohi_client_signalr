@@ -72,5 +72,56 @@ namespace Tohi.Client.Signalr.Hubs
                 throw new Exception($"[OnConnectedAsync]: unhandled exception, {ex.Message}");
             }
         }
+
+        /// <summary>
+        /// Tham gia phòng livestream
+        /// </summary>
+        /// <param name="group">Phòng livestream</param>
+        /// <returns></returns>
+        public async Task JoinGroup(string group)
+        {
+            try
+            {
+                var connectionId = Context.ConnectionId;
+                var userId = Context.User.Identity.Name;
+
+                // Xử lý tham gia phòng livestream
+                using (var scope = _scope.CreateScope())
+                {
+                    if (userId != null)
+                    {
+                        var client = scope.ServiceProvider.GetRequiredService<IClientService>();
+                        var cache = scope.ServiceProvider.GetRequiredService<IDistributedCacheExtensionService>();
+
+                        // Lấy dữ liệu người dùng và stream
+                        var user = await client.GetClientUser(userId);
+                        var stream = await client.GetClientStream(group);
+
+                        // Cập nhật phòng tham gia cho client
+                        var clientLivestreamKey = ClientKeys.Livestream(connectionId);
+                        var clientLivestream = cache.TryGetValue<string>(clientLivestreamKey, out var _clientLivestream);
+                        if (clientLivestream)
+                        {
+                            if (_clientLivestream != group)
+                            {
+                                // Xóa client khỏi phòng và cập nhật lượt xem của phòng cũ
+                                await Groups.RemoveFromGroupAsync(connectionId, _clientLivestream);
+                                await client.UpdateViewerForStreamByGroup(_clientLivestream, -1);
+                            }
+                        }
+                        await cache.SetAsync(clientLivestreamKey, group);
+                        await Groups.AddToGroupAsync(connectionId, group);
+                    }
+                }
+            }
+            catch (BaseException ex)
+            {
+                _logger.LogError($"[JoinGroup]: handled exception, {ex.message}");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"[JoinGroup]: unhandled exception, {ex.Message}");
+            }
+        }
     }
 }
