@@ -48,7 +48,7 @@ namespace Tohi.Client.Signalr.Services.Streams
                     // Lưu thông tin livestream vào cache
                     var streamInfomation = LivestreamKeys.Information(group);
                     var streamCacheModel = _mapper.Map<StreamModels>(stream);
-                    await _cache.SetAsync(streamInfomation, streamCacheModel);
+                    await _cache.SetAsync(streamInfomation, streamCacheModel, MemoryCaches.ExpiredTimeEntry);
                     return streamCacheModel;
                 }
                 else

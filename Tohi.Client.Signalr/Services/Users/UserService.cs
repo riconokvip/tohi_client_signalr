@@ -38,7 +38,7 @@ namespace Tohi.Client.Signalr.Services.Users
                 // Cập nhật dữ liệu người dùng vào cache
                 var userCacheModel = _mapper.Map<UserModels>(user);
                 var userInformationKey = UserKeys.Information(userId);
-                await _cache.SetAsync(userInformationKey, userCacheModel);
+                await _cache.SetAsync(userInformationKey, userCacheModel, MemoryCaches.ExpiredTimeEntry);
                 return userCacheModel;
             }
             else

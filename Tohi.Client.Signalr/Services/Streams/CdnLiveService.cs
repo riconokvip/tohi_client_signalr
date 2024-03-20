@@ -35,7 +35,7 @@ namespace Tohi.Client.Signalr.Services.Streams
 
                     // Cập nhật hls vào cache
                     var userHlsSrcKey = UserKeys.HlsSrc(group);
-                    await _cache.SetAsync(userHlsSrcKey, cdnLive.HlsPlayLink);
+                    await _cache.SetAsync(userHlsSrcKey, cdnLive.HlsPlayLink, MemoryCaches.ExpiredTimeEntry);
                     return cdnLive.HlsPlayLink;
                 }
                 else
