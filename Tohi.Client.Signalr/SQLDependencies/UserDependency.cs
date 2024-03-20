@@ -23,6 +23,9 @@ namespace Tohi.Client.Signalr.SQLDependencies
             try
             {
                 _dependency = new SqlTableDependency<UserEntities>(connectionString);
+                _dependency.OnChanged += OnUserChanged;
+                _dependency.OnError += OnError;
+                _dependency.Start();
             }
             catch (Exception)
             {
