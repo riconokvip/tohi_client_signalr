@@ -20,6 +20,11 @@ builder.Services.AddDbContextPool<ApplicationDbContext>(options =>
     options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
 });
 
+// Add config
+ConfigAuthentication(builder);
+
+
+
 var app = builder.Build();
 
 // Setup cors
@@ -46,3 +51,17 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+
+// Setup auth
+static void ConfigAuthentication(WebApplicationBuilder builder)
+{
+    var tokenConfigSection = builder.Configuration.GetSection(JwtConfig.ConfigName);
+    if (tokenConfigSection == null)
+        throw new Exception("Can not find Token Config in appsettings.json");
+
+    builder.Services.Configure<JwtConfig>(tokenConfigSection);
+    builder.Services.AddSingleton(tokenConfigSection.Get<JwtConfig>());
+    // builder.Services.AddHttpContextAccessor();
+    builder.Services.AddTransient<IJwtHepler, JwtHelper>();
+}
