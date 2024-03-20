@@ -23,6 +23,8 @@ builder.Services.AddDbContextPool<ApplicationDbContext>(options =>
 // Add config
 ConfigAuthentication(builder);
 
+ConfigMapping(builder);
+
 
 
 var app = builder.Build();
@@ -64,4 +66,10 @@ static void ConfigAuthentication(WebApplicationBuilder builder)
     builder.Services.AddSingleton(tokenConfigSection.Get<JwtConfig>());
     // builder.Services.AddHttpContextAccessor();
     builder.Services.AddTransient<IJwtHepler, JwtHelper>();
+}
+
+// Setup mapping
+static void ConfigMapping(WebApplicationBuilder builder)
+{
+    builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 }
