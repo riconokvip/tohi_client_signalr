@@ -58,6 +58,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.MapHub<ClientHub>("tohi/public");
+
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
